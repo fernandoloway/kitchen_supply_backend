@@ -1,0 +1,53 @@
+
+// ganti ES6 promise dengan bluebird
+var promise = require('bluebird');
+
+var options = {
+    // Initialization Options
+    promiseLib: promise
+};
+
+var pgp = require('pg-promise')(options);
+var connectionString= 'postgres://fernando:12345@localhost:5432/kitchen_supply';
+var db = pgp(connectionString);
+
+// add query functions
+
+
+function getProductsByCategory(req, res, next) {
+    console.log('tes')
+    db.any('select * from product')
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'retrieved all products'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getSingleProduct(req, res, next) {
+    var productID = parseInt(req.params.id);
+    db.one('select * from product where id = $1', productID)
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'retrieved one product'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+
+module.exports = {
+    getProductsByCategory: getProductsByCategory,
+    getSingleProduct: getSingleProduct
+};
